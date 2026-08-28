@@ -1,0 +1,55 @@
+@keyframes reelSpinForward {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reelSpinFast {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cassette-body.playing .reel {
+  animation: reelSpinForward 1.1s linear infinite;
+}
+
+.cassette-body.buffering .reel {
+  animation: reelSpinForward 1.8s linear infinite;
+}
+
+.cassette-body.paused .reel,
+.cassette-body.stopped .reel {
+  animation: none;
+}
+
+.cassette-body.playing .tape-strip {
+  animation: tapeMove 0.5s linear infinite;
+}
+
+.cassette-body.buffering .tape-strip {
+  animation: tapeMove 1s linear infinite;
+}
+
+.cassette-body.paused .tape-strip,
+.cassette-body.stopped .tape-strip {
+  animation: none;
+}
+
+@keyframes tapeMove {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 40px 0;
+  }
+}

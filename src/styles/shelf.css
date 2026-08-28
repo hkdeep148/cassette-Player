@@ -1,0 +1,362 @@
+/* ==========================================
+   CASSETTE SHELF — Drawer that lives under the deck
+   Looks like part of the same wooden hi-fi cabinet
+   ========================================== */
+
+.cassette-shelf {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  /* Wood grain background — matches deck's shelf */
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.1) 8%,
+      rgba(0, 0, 0, 0.05) 100%),
+    linear-gradient(90deg,
+      #3a2818 0%,
+      #4a3020 20%,
+      #3d2818 45%,
+      #4a3020 70%,
+      #3a2818 100%);
+  border-top: 2px solid rgba(255, 200, 130, 0.15);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.7);
+  /* Inner shadow makes it look recessed */
+  box-shadow:
+    inset 0 8px 20px rgba(0, 0, 0, 0.6),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.4),
+    0 6px 20px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cassette-shelf.open {
+  max-height: 340px;
+}
+
+.cassette-shelf.closed {
+  max-height: 26px;
+}
+
+/* Warm lamp glow from the right side */
+.cassette-shelf::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 90% 50%,
+    rgba(255, 180, 90, 0.12) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* ===== DRAWER HANDLE ===== */
+
+.drawer-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 20px;
+  background: linear-gradient(180deg, #2a1a10 0%, #1a1008 100%);
+  border: none;
+  border-radius: 0 0 8px 8px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.drawer-handle:hover {
+  background: linear-gradient(180deg, #3a2818 0%, #2a1808 100%);
+}
+
+.drawer-handle-grip {
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 200, 130, 0.4);
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.drawer-handle:hover .drawer-handle-grip {
+  background: rgba(255, 200, 130, 0.7);
+}
+
+/* ===== SHELF INTERIOR ===== */
+
+.shelf-interior {
+  padding: 28px 60px 20px;
+  opacity: 1;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+.cassette-shelf.closed .shelf-interior {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ===== HEADER ===== */
+
+.shelf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  color: rgba(255, 220, 180, 0.9);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.08em;
+}
+
+.shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.shelf-icon {
+  font-size: 16px;
+  filter: sepia(0.3);
+}
+
+.shelf-hint {
+  font-size: 11px;
+  color: rgba(255, 220, 180, 0.55);
+  font-style: italic;
+}
+
+/* ===== CASSETTE ROW ===== */
+
+.shelf-content {
+  position: relative;
+}
+
+.cassette-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  padding: 0 30px;
+}
+
+/* ===== CASSETTE CARD ===== */
+
+.cassette-card {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.cassette-card:hover {
+  transform: translateY(-4px);
+}
+
+.cassette-card.selected {
+  transform: translateY(-6px);
+}
+
+.cassette-card.selected .cassette-case {
+  box-shadow:
+    0 0 0 2px rgba(255, 190, 90, 0.9),
+    0 0 24px rgba(255, 190, 90, 0.6),
+    0 0 48px rgba(255, 150, 60, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== CASSETTE CASE (Clear plastic shell) ===== */
+
+.cassette-case {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px;
+  aspect-ratio: 3 / 4;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+/* ===== CASSETTE INNER (The actual cassette) ===== */
+
+.cassette-inner {
+  width: 100%;
+  height: 100%;
+  background: var(--cassette-color);
+  border-radius: 2px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== LABEL ===== */
+
+.cassette-label {
+  background: var(--label-color);
+  padding: 10px 8px;
+  border-radius: 1px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: var(--text-color);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.cassette-corner-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--text-color);
+  color: var(--label-color);
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1px;
+  font-family: "Courier New", monospace;
+}
+
+.cassette-title-block {
+  margin-top: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.cassette-title {
+  font-family: "Brush Script MT", cursive;
+  font-size: 15px;
+  line-height: 1.1;
+  font-weight: bold;
+}
+
+.cassette-subtitle {
+  font-family: "Brush Script MT", cursive;
+  font-size: 13px;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.cassette-accent {
+  font-size: 22px;
+  margin-top: 4px;
+  filter: sepia(0.2);
+}
+
+.cassette-duration {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: bold;
+  opacity: 0.7;
+}
+
+.cassette-tape-type {
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "Courier New", monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  padding: 3px 0 0 4px;
+}
+
+/* ===== NAVIGATION ARROWS ===== */
+
+.shelf-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 220, 180, 0.3);
+  background: rgba(20, 12, 6, 0.8);
+  color: rgba(255, 220, 180, 0.8);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.shelf-arrow:hover {
+  background: rgba(40, 24, 12, 0.9);
+  color: rgba(255, 220, 180, 1);
+  border-color: rgba(255, 220, 180, 0.6);
+}
+
+.shelf-arrow-left { left: -4px; }
+.shelf-arrow-right { right: -4px; }
+
+/* ===== PAGINATION DOTS ===== */
+
+.shelf-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.shelf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 220, 180, 0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.shelf-dot:hover {
+  background: rgba(255, 220, 180, 0.5);
+}
+
+.shelf-dot.active {
+  background: rgba(255, 190, 90, 0.9);
+  box-shadow: 0 0 8px rgba(255, 190, 90, 0.6);
+  width: 10px;
+  height: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 900px) {
+  .shelf-interior { padding: 28px 30px 20px; }
+  .cassette-row { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+}
+
+@media (max-width: 600px) {
+  .cassette-row { grid-template-columns: repeat(2, 1fr); }
+  .shelf-hint { display: none; }
+}

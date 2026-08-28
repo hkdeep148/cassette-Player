@@ -1,0 +1,930 @@
+/* =========================================================
+   CASSETTE DECK — FRAME-BASED SYSTEM
+   
+   Layer Stack:
+   z-index: 3   →  deck frame image
+   z-index: 5   →  cassette slot (contains still PNG + videos)
+   z-index: 6   →  power button, track title
+   z-index: 20  →  header GIF overlay
+   z-index: 30  →  eject button
+   ========================================================= */
+
+.cassette-deck {
+  position: relative;
+
+  width: min(1200px, 88vw);
+  aspect-ratio: 2000 / 780;
+
+  transform: translateY(45px);
+
+  user-select: none;
+
+  /* ==========================================
+     🎛️ INDEPENDENT POSITION CONTROLS
+     ========================================== */
+
+  /* ---------- Cassette SLOT (container box on the DECK) ---------- */
+  --slot-top: 22.7%;
+  --slot-left: 33%;
+  --slot-width: 31.9%;
+  --slot-height: 68.9%;
+
+  /* ---------- Cassette STILL PNG (position INSIDE slot, % of slot) ---------- */
+  --still-top: -45.4%;
+  --still-left: -2.6%;
+  --still-width: 105.5%;
+  --still-height: 105.5%;
+
+  /* ---------- Cassette VIDEO (position INSIDE slot, % of slot) ---------- */
+  --video-top: -45.4%;
+  --video-left: -2.6%;
+  --video-width: 105.5%;
+  --video-height: 105.5%;
+
+  /* ---------- Header GIF (open/close, % of deck for width) ---------- */
+  --gif-top: -19.6%;
+  --gif-left: 15.2%;
+  --gif-width: 69.7%;
+  --gif-height: auto;
+
+  /* ---------- RESET button ---------- */
+  --reset-top: 35.5%;
+  --reset-left: 28.6%;
+  --reset-width: 1.1%;
+  --reset-height: 5.2%;
+
+  /* ---------- Transition timing ---------- */
+  --fade-duration: 400ms;
+  --fade-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+
+
+/* =========================================================
+   BASE FRAME IMAGE
+   ========================================================= */
+
+.deck-frame-image {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  pointer-events: none;
+  -webkit-user-drag: none;
+
+  z-index: 3;
+
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.5));
+}
+
+
+
+
+/* =========================================================
+   CASSETTE SLOT — Container for still PNG AND videos
+   ========================================================= */
+
+.deck-cassette-slot {
+  position: absolute;
+
+  top: var(--slot-top);
+  left: var(--slot-left);
+  width: var(--slot-width);
+  height: var(--slot-height);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: visible;
+
+  z-index: 5;
+}
+
+
+/* =========================================================
+   CASSETTE STILL PNG — ALWAYS VISIBLE (no flash on stop)
+   ========================================================= */
+
+.deck-cassette-still {
+  position: absolute;
+
+  top: var(--still-top);
+  left: var(--still-left);
+  width: var(--still-width);
+  height: var(--still-height);
+
+  object-fit: contain;
+
+  pointer-events: none;
+  -webkit-user-drag: none;
+
+  /* Always visible — GIF overlays on top when playing */
+  opacity: 1;
+
+  z-index: 1;
+}
+
+
+/* =========================================================
+   CASSETTE VIDEOS — Only .active layer is visible
+   ========================================================= */
+
+.deck-cassette-video {
+  position: absolute;
+  top: var(--video-top);
+  left: var(--video-left);
+  width: var(--video-width);
+  height: var(--video-height);
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 2;
+}
+
+.deck-cassette-video.active {
+  opacity: 1;
+}
+
+/* Static PNG always underneath */
+.deck-cassette-still {
+  position: absolute;
+  top: var(--still-top);
+  left: var(--still-left);
+  width: var(--still-width);
+  height: var(--still-height);
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  opacity: 1;
+  z-index: 1;
+}
+
+/* ❌ DELETE these old conflicting rules if they exist:
+.deck-cassette-slot.playing .deck-cassette-video.active { opacity: 1; }
+.deck-cassette-slot.buffering .deck-cassette-video.active { opacity: 1; }
+.deck-cassette-slot.fastForward .deck-cassette-video.active { opacity: 1; }
+.deck-cassette-slot.rewinding .deck-cassette-video.active { opacity: 1; }
+.deck-cassette-slot.paused .deck-cassette-video.active { opacity: 0; }
+.deck-cassette-slot.stopped .deck-cassette-video.active { opacity: 0; }
+*/
+
+/* Static PNG — always underneath */
+.deck-cassette-still {
+  position: absolute;
+  top: var(--still-top);
+  left: var(--still-left);
+  width: var(--still-width);
+  height: var(--still-height);
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  opacity: 1;
+  z-index: 1;
+}
+
+/* =========================================================
+   TRACK TITLE
+   ========================================================= */
+
+.deck-track-title {
+  position: absolute;
+
+  top: 16%;
+  left: 36%;
+  width: 23%;
+
+  padding: 2px 4px;
+
+  font-family: Georgia, serif;
+  font-size: clamp(9px, 0.9vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  color: #1a1a1a;
+
+  text-align: center;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  pointer-events: none;
+
+  z-index: 6;
+}
+
+
+/* =========================================================
+   VOLUME KNOB
+   ========================================================= */
+
+.deck-volume-knob {
+  position: absolute;
+
+  top: 63.2%;
+  left: 14.9%;
+
+  width: 4.7%;
+  height: 12.05%;
+
+  cursor: grab;
+
+  touch-action: none;
+
+  z-index: 5;
+}
+
+.deck-volume-knob.dragging {
+  cursor: grabbing;
+}
+
+
+/* =========================================================
+   BALANCE KNOB
+   ========================================================= */
+
+.deck-balance-knob {
+  position: absolute;
+
+  top: 62.9%;
+  left: 25.2%;
+
+  width: 4.8%;
+  height: 12.31%;
+
+  cursor: grab;
+
+  touch-action: none;
+
+  z-index: 5;
+}
+
+.deck-balance-knob.dragging {
+  cursor: grabbing;
+}
+
+
+/* =========================================================
+   TAPE SELECTOR KNOB
+   ========================================================= */
+
+.deck-tape-selector {
+  position: absolute;
+
+  top: 64.5%;
+  left: 69.2%;
+
+  width: 3.9%;
+  height: 10%;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+  user-select: none;
+
+  z-index: 5;
+
+  transition: transform 100ms ease;
+}
+
+.deck-tape-selector:hover {
+  transform: scale(1.02);
+}
+
+.deck-tape-selector:active {
+  transform: scale(0.97);
+}
+
+.deck-tape-selector:focus-visible {
+  outline: 2px solid rgba(215, 163, 111, 0.5);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.deck-tape-selector .deck-knob-image {
+  transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+
+/* =========================================================
+   SHARED KNOB IMAGE
+   ========================================================= */
+
+.deck-knob-image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  pointer-events: none;
+  -webkit-user-drag: none;
+
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+
+/* =========================================================
+   TRANSPORT BUTTONS
+   ========================================================= */
+
+.deck-transport-grid {
+  position: absolute;
+
+  top: 8.5%;
+  left: 66.2%;
+  width: 20%;
+  height: 32%;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+
+  row-gap: 0px;
+  column-gap: 0px;
+
+  z-index: 5;
+}
+
+.deck-btn {
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    transform 70ms ease,
+    filter 70ms ease;
+}
+
+.deck-btn img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.deck-btn:active {
+  transform: scale(0.94);
+  filter: brightness(0.75);
+}
+
+.deck-btn.active img {
+  filter: brightness(1.1) drop-shadow(0 0 3px rgba(215, 163, 111, 0.4));
+}
+
+.deck-btn-bottom {
+  transform: translateY(-1.4px);
+}
+
+.deck-btn-bottom:active {
+  transform: translateY(-1.4px) scale(0.94);
+  filter: brightness(0.75);
+}
+
+
+/* =========================================================
+   POWER BUTTON
+   ========================================================= */
+
+.deck-power-button-image {
+  position: absolute;
+
+  top: 28.4%;
+  left: 13.5%;
+  width: 5%;
+  height: 10%;
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+
+  z-index: 6;
+
+  transition: transform 80ms ease, filter 80ms ease;
+}
+
+.deck-power-button-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.deck-power-button-image:active {
+  transform: scale(0.94);
+  filter: brightness(0.75);
+}
+
+.deck-power-button-image.on img {
+  filter: brightness(1.1) drop-shadow(0 0 4px rgba(255, 200, 100, 0.4));
+}
+
+.deck-power-button-image.off img {
+  filter: brightness(0.85);
+}
+
+
+/* =========================================================
+   RESET BUTTON
+   ========================================================= */
+
+.deck-reset-button {
+  position: absolute;
+
+  top: var(--reset-top);
+  left: var(--reset-left);
+  width: var(--reset-width);
+  height: var(--reset-height);
+
+  padding: 0;
+  margin: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+
+  z-index: 6;
+
+  transition: transform 80ms ease, filter 80ms ease;
+}
+
+.deck-reset-button img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.deck-reset-button:active {
+  /* Same press animation as the play/transport buttons */
+  transform: scale(0.94);
+  filter: brightness(0.75);
+}
+
+.cassette-deck.power-off .deck-reset-button img {
+  filter: brightness(0.85);
+}
+
+
+/* =========================================================
+   PLAYLIST DISPLAY
+   ========================================================= */
+
+.deck-playlist-display {
+  position: absolute;
+
+  top: 64.4%;
+  left: 36%;
+  width: 13.8%;
+  height: 6%;
+
+  padding: 3px 8px;
+
+  overflow: hidden;
+
+  z-index: 4;
+}
+
+.deck-playlist-inner {
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.deck-playlist-scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(20px, 3.12vw, 40px);
+
+  white-space: nowrap;
+
+  animation: playlist-scroll 30s linear infinite;
+
+  will-change: transform;
+}
+
+.deck-playlist-display:hover .deck-playlist-scroll {
+  animation-play-state: paused;
+}
+
+.deck-playlist-text {
+  display: inline-block;
+
+  font-family: "Courier New", "Consolas", monospace;
+  font-size: clamp(7px, 0.858vw, 11px);
+  font-weight: 600;
+  letter-spacing: clamp(0.8px, 0.117vw, 1.5px);
+
+  color: #e8a866;
+
+  text-shadow:
+    0 0 3px rgba(232, 168, 102, 0.6),
+    0 0 6px rgba(232, 168, 102, 0.25);
+
+  text-transform: uppercase;
+
+  padding-right: 40px;
+}
+
+@keyframes playlist-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+
+/* =========================================================
+   MECHANICAL TAPE COUNTER
+   ========================================================= */
+
+.deck-tape-counter {
+  position: absolute;
+
+  top: 28.5%;
+  left: 21.8%;
+  width: 5.5%;
+  height: 7.2%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 4;
+}
+
+.counter-wheels {
+  display: flex;
+  gap: 1px;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 2px;
+
+  background:
+    linear-gradient(180deg, #000 0%, #0a0a0a 50%, #000 100%);
+
+  border: 1px solid #1a1a1a;
+  border-radius: 2px;
+
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.03);
+}
+
+.counter-wheel {
+  position: relative;
+  flex: 1;
+  height: 100%;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(180deg, #0a0a0a 0%, #000 50%, #0a0a0a 100%);
+
+  border-radius: 1px;
+
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.8),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.counter-wheel-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  height: 1000%;
+
+  transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+
+  will-change: transform;
+}
+
+.counter-digit {
+  height: 10%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Courier New", "Consolas", monospace;
+  font-size: clamp(7px, 0.936vw, 12px);
+  font-weight: 500;
+
+  color: #e8e8e8;
+
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.4),
+    0 0 6px rgba(255, 255, 255, 0.2);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      transparent 20%,
+      transparent 80%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+}
+
+.counter-wheel::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+  z-index: 2;
+  pointer-events: none;
+}
+
+.counter-wheel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.7) 0%,
+      transparent 25%,
+      transparent 75%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+
+  pointer-events: none;
+  z-index: 3;
+}
+
+
+/* =========================================================
+   HIDDEN ELEMENTS
+   ========================================================= */
+
+.deck-progress-track,
+.deck-playlist-title,
+.deck-time-current,
+.deck-time-total {
+  display: none;
+}
+
+
+/* =========================================================
+   POWER STATES
+   ========================================================= */
+
+.cassette-deck.power-off .deck-cassette-video.active {
+  animation-play-state: paused;
+  filter: brightness(0.85) saturate(0.7);
+}
+
+.cassette-deck.power-off .deck-playlist-scroll {
+  animation-play-state: paused;
+}
+
+.cassette-deck.power-off .deck-playlist-text {
+  opacity: 0;
+  text-shadow: none;
+}
+
+.cassette-deck.power-off .deck-btn.active img {
+  filter: none;
+}
+
+.cassette-deck.power-off .counter-digit {
+  color: #333;
+  text-shadow: none;
+}
+
+.deck-cassette-video,
+.deck-playlist-scroll,
+.deck-playlist-text,
+.deck-btn img,
+.counter-digit {
+  transition:
+    filter 0.4s ease,
+    color 0.4s ease,
+    text-shadow 0.4s ease;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .cassette-deck {
+    width: 92vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .cassette-deck {
+    width: 96vw;
+    transform: translateY(20px);
+  }
+
+  .deck-track-title {
+    font-size: 9px;
+  }
+}
+
+
+/* =========================================================
+   HEADER GIF OVERLAY — Zero-flash overlapping layers
+   ========================================================= */
+
+.deck-header-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+  overflow: visible;
+}
+
+.deck-header-preload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.deck-header-gif {
+  position: absolute;
+  top: var(--gif-top);
+  left: var(--gif-left);
+  width: var(--gif-width);
+  height: var(--gif-height);
+  object-fit: contain;
+
+  opacity: 0;
+  /* NO transition by default — instant swap = zero flash */
+  transition: none;
+  
+  will-change: opacity;
+  pointer-events: none;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  ), linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 8%,
+    black 92%,
+    transparent 100%
+  ), linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-composite: intersect;
+}
+
+/* Close GIF sits ABOVE open GIF */
+.deck-header-gif-open {
+  z-index: 1;
+}
+
+.deck-header-gif-close {
+  z-index: 2;
+}
+
+/* INSTANT show — no fade, no flash */
+.deck-header-gif.visible {
+  opacity: 1;
+  transition: none;
+}
+
+
+/* =========================================================
+   HIDE CASSETTE DURING LID TRANSITIONS
+   Keep cassette VISIBLE until GIF is ready
+   ========================================================= */
+
+.deck-cassette-slot {
+  transition: opacity 0ms linear;
+}
+
+/* Only hide cassette when lid is FULLY open (GIF showing last frame) */
+.cassette-deck.lid-open .deck-cassette-slot {
+  opacity: 0;
+  transition: none;
+}
+
+/* During opening/closing — cassette stays visible UNDERNEATH the GIF
+   (GIF covers it anyway, but no flash if GIF has a transparent frame) */
+.cassette-deck.lid-opening .deck-cassette-slot,
+.cassette-deck.lid-closing .deck-cassette-slot {
+  opacity: 1;
+  transition: none;
+}
+
+
+/* =========================================================
+   EJECT BUTTON — Disable during lid animation
+   ========================================================= */
+
+.cassette-deck.lid-opening .deck-btn[aria-label="Eject cassette"],
+.cassette-deck.lid-opening .deck-btn[aria-label="Close deck"],
+.cassette-deck.lid-closing .deck-btn[aria-label="Eject cassette"],
+.cassette-deck.lid-closing .deck-btn[aria-label="Close deck"] {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.deck-status-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;      /* Vertical center */
+  justify-content: center;  /* Horizontal center */
+  padding: 0;
+  margin: 0;
+  animation: status-flash 200ms ease-out;
+}
+
+.deck-status-text {
+  color: #ffc978 !important;
+  font-weight: bold !important;
+  letter-spacing: clamp(0.8px, 0.117vw, 1.5px) !important;
+  font-size: clamp(7px, 0.858vw, 11px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1;
+  text-shadow:
+    0 0 4px rgba(255, 200, 100, 0.8),
+    0 0 8px rgba(255, 200, 100, 0.4) !important;
+  animation: status-pulse 1s ease-in-out infinite;
+}
