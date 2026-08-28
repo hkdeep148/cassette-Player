@@ -772,7 +772,7 @@
 @media (max-width: 600px) {
   .cassette-deck {
     width: 96vw;
-    transform: translateY(20px);
+    transform: translateY(clamp(70px, 5vh, 100px));
   }
 
   .deck-track-title {
