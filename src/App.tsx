@@ -148,13 +148,16 @@ const handleLidClosedAfterSwap = useCallback(() => {
         isSwappingPlaylist={isSwappingCassette}
       />
 
-      <YouTubePlayer
-        playlistId={playlistId}
-        onReady={handlePlayerReady}
-        onTrackChange={handleTrackChange}
-        onProgress={handleProgress}
-        onPlaybackStateChange={setYoutubeState}
-      />
+<YouTubePlayer
+  playlistId={playlistId}
+  onReady={handlePlayerReady}
+  onTrackChange={handleTrackChange}
+  onProgress={handleProgress}
+  onPlaybackStateChange={setYoutubeState}
+  onPlaylistLoaded={() => {
+    console.log("✅ Playlist ready for playback");
+  }}
+/>
     </main>
   );
 }
